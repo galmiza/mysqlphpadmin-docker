@@ -10,7 +10,7 @@ Build the image, run the container and visit http://localhost:8000/ to open the 
 
 ```
 docker build -t phpmyadmin .
-docker run -d -p 8000:80 -p 3306:3306 --name=mycontainer phpmyadmin
+docker run -d -p 8000:80 -p 3306:3306 --name=myContainer phpmyadmin
 ```
 
 You can use network configuration to securely expose mysql or phpmyadmin on internet.
@@ -20,6 +20,12 @@ You can use network configuration to securely expose mysql or phpmyadmin on inte
 ### Backup to OVH object storage with crontab
 
 Below is an example of a backup procedure to export a database into a S3-like object in the cloud.
+
+Create an interactive shell on the container
+
+```
+docker exec -it myContainer /bin/bash
+```
 
 Install swift, the object/blob management component from the [OpenStack](https://www.openstack.org/) standard cloud computing platform
 
@@ -37,8 +43,8 @@ Create the following script into /root/backup.sh *(vi /root/backup.sh)*
 cd /root
 NAME=mysql_$(date +%Y-%m-%d).dump.gz  # generate a filename for the archive
 mysqldump -u myDatabaseUser -pmyDatabasePwd myDatabaseName | gzip 1>$NAME  # export and compress
-source openrc.sh
-/usr/local/bin/swift upload mantis-backup $NAME 
+source openrc.sh  # load environment variables with access credentials to your cloud operator
+/usr/local/bin/swift upload myObjectContainer $NAME 
 rm $NAME
 ```
 
